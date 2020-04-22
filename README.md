@@ -20,14 +20,15 @@ Windows users will need to reboot after installing the drivers.
 
 If you're using linux you can skip this step. But instead you will need to add yourself to the `dialout` group using the command
 
-```
+```bash
 sudo usermod -a dialout YOUR_USERNAME
 ```
+
 You will need to restart or logout and in again afterwards.
 
 ### 2. Install Node.js
 
-Install a recent version of  [NodeJS](https://nodejs.org) installed (v6 is preferred).
+Install a recent version of  [NodeJS](https://nodejs.org) installed (v10 is preferred).
 
 ### 3. Build the bot
 
@@ -35,28 +36,11 @@ Build the bot according to the instructions in your kit
 
 ### 4. Install firmware using Interchange
 
-We need to install the firmata firmware onto the board. We do this using a tool called `interchange`.
+We need to install the firmata firmware onto the board.
 
-Connect the USB cable and switch the on/off switch to on. Open up the command line (command prompt, iTerm, etc) and install interchange globally with the following command.
+This fork uses a custom firmware, which combines the latest firmata (2.5.8), drivers for the WS2812 LED strips from [Node-Pixel](https://github.com/ajfisher/node-pixel), and the `mbotFirmata.ino` sketch from the original repository.
 
-```
-npm install -g nodebots-interchange
-```
-
-You can install the firmware to work with either USB or Bluetooth with appropriate
-firmata using the firmata switch on interchange.
-
-To use USB:
-
-```
-interchange install git+https://github.com/Makeblock-official/mbot_nodebots -a uno --firmata=usb
-```
-
-To use Bluetooth:
-
-```
-interchange install git+https://github.com/Makeblock-official/mbot_nodebots -a uno --firmata=bluetooth
-```
+Open the sketch in Arduino IDE, connect your mBot via USB, compile and upload the sketch onto the board.
 
 If you see `Error: no Arduino 'uno' found.`. Make sure the on/off switch is on. Also check you have the drivers installed properly. Did you forget to reboot? El Capitan users please make sure you installed the codebenderDriver version located in the driver directory.
 
@@ -66,9 +50,25 @@ If you see `There was an error downloading the manifest file.` try checking your
 
 If you see `Permission denied, cannot open /dev/ttyUSB0` double check you're in the dialout group and you restarted.
 
-### 4. (Alternative) Install firmware using Arduino IDE
+### 5. Install npm modules
 
-If you're having troubles with interchange, you can install the firmata firmware using the Arduino IDE however this method is now no longer the preferred option.
+Run `npm -i` to install third-party dependencies. This fork updates `johnny-five` and `node-pixel` to their latest versions.
+
+On Windows, you could run into problems compiling native bindings. Make sure you have Windows build tools installed; if not, run:
+
+```bash
+npm install -g --production windows-build-tools --vs2015
+```
+
+Please be aware that as of 2020-04, you cannot run any code on your mBot under Windows Subsystem for Linux (WSL) using USB or Bluetooth. WSL does not have access to any peripherals. This might change in the future.
+
+Due to a known bug in `node-pixel` v.0.10.2, it is necessary to patch the file `./node_modules/node-pixel/lib/pixel.js', line **94**:
+
+```javascript
+var port = firmata.transport || firmata;
+```
+
+Otherwise, you'll see `NoWritablePortError` when trying to access the LEDs. Hopefully this gets fixed soon and this notice will disappear.
 
 ## Examples
 
@@ -78,14 +78,15 @@ Once you're done with an example, close the program by pressing `Ctrl + c` twice
 
 If you get the error `Error: Cannot find module 'johnny-five'` or another module, try running the command `npm install` from the `mbot_nodebots` directory.
 
-
 ### LEDs
 
 Lets make the lights flash. There are 2 LEDs on the mbot which are RGB (Red Green Blue) NeoPixel LEDs. These are connected in a strip so you can use node-pixel to control them. An example is `examples/leds.js`
 
-```
+```bash
 node examples/leds.js
 ```
+
+Because we're using a custom firmware, it's also necessary to add `skip_firmware_check: true` to `StripOptions`, or you'll see `IncorrectFirmataVersionError`.
 
 ### Buzzer
 
@@ -98,6 +99,8 @@ Use `examples/motors.js` this will drive the mbot around using the arrow keys on
 your keyboard. You may need to change the details of the directions depending on
 how you wired up the motors.
 
+This is not yet working.
+
 ### Obstacle detection
 
 Use `examples/sonar.js` to detect the distance to an object. You can use this to
@@ -107,6 +110,8 @@ stop your robot from running into things.
 
 Your mbot has a little button that you can use to trigger something maybe. Use
 `examples/button.js` to detect the button press and do something with it.
+
+This is not yet working.
 
 ### Light Sensor
 
@@ -124,15 +129,16 @@ case).
 
 Once you get this working you can build an effective line following bot.
 
-
 ## Bluetooth module
+
+Below are instructions from the original repo. Not sure how much they apply.
 
 To use the BT module do the following modifications:
 
 * Remove the bluetooth module from the mBot
 * Install the bluetooth firmata with instruction below
 
-```
+```bash
 interchange install git+https://github.com/Makeblock-official/mbot_nodebots -a uno --firmata=bluetooth
 ```
 
@@ -142,7 +148,7 @@ usually BT settings in your control panel). It should be called `Makeblock`. Hop
 
 Test the connection by using a screen terminal such as:
 
-```
+```bash
 screen /dev/tty.Makeblock-ELETSPP
 ```
 
@@ -150,7 +156,7 @@ If this connects you should see the blue LED on the BT module go solid. From the
 hit the reset button on the board and then you should see something like the following
 appear on your terminal.
 
-```
+```bash
 ��ymbotFirmata.ino��{�3��l�A�2�U�
 ```
 
@@ -158,7 +164,7 @@ If you don't get that, test your connection etc. If you do then proceed.
 
 Now execute
 
-```
+```bash
 node examples/leds.js /dev/tty.Makeblock-ELETSPP
 ```
 
@@ -169,13 +175,14 @@ most of the examples though speed may be an issue in high data rate cases.
 
 Install using:
 
-```
+```bash
 npm install drivers/node-hid
 ```
 
 Run example
 
-```
+```bash
 node examples/wifi_motors.js
 ```
 
+I haven't yet tested this and it's not working for me.
