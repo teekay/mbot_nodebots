@@ -28,7 +28,7 @@ You will need to restart or logout and in again afterwards.
 
 ### 2. Install Node.js
 
-Install a recent version of  [NodeJS](https://nodejs.org) installed (v10 is preferred).
+Install a recent version of [NodeJS](https://nodejs.org) installed (v10 is tested at the moment).
 
 ### 3. Build the bot
 
@@ -39,6 +39,8 @@ Build the bot according to the instructions in your kit
 We need to install the firmata firmware onto the board.
 
 This fork uses a custom firmware, which combines the latest firmata (2.5.8), drivers for the WS2812 LED strips from [Node-Pixel](https://github.com/ajfisher/node-pixel), and the `mbotFirmata.ino` sketch from the original repository.
+
+At this moment this custom firmware is only present in ./firmware/build/bluetooth. This is not the proper place and will be updated.
 
 Open the sketch in Arduino IDE, connect your mBot via USB, compile and upload the sketch onto the board.
 
@@ -75,8 +77,6 @@ Otherwise, you'll see `NoWritablePortError` when trying to access the LEDs. Hope
 Time to play with some code. There are plenty of examples in the examples directory that you can learn from. You can run from a command line using the command `node examples/file.js`.
 
 Once you're done with an example, close the program by pressing `Ctrl + c` twice.
-
-If you get the error `Error: Cannot find module 'johnny-five'` or another module, try running the command `npm install` from the `mbot_nodebots` directory.
 
 ### LEDs
 
@@ -185,4 +185,14 @@ Run example
 node examples/wifi_motors.js
 ```
 
-I haven't yet tested this and it's not working for me.
+Admittedly this is not working for me.
+
+## Toys
+
+I took hints from the examples and started writing my own toys.
+
+And, because writing untyped Javascript sucks, I introduced Typescript into the project. Luckily we have types for `johnny-five`, not so lucky with `node-pixel`, and so I've started drafting their type definitions (see the `./types` folder). Arguably it would make sense to do them properly and offer them to `node-pixel` as a PR.
+
+The toys are in the `./toys` folder.
+
+My goal is to build a toy that would make the mBot come alive, move and interact with me.
