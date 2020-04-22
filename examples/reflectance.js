@@ -1,8 +1,9 @@
 // Assumes the reflectance sensor is put into PORT 3
-
 // Gives you values of the reflectance sensor.
 var five = require("johnny-five"),
-    board = new five.Board();
+    board = new five.Board({
+      port: process.argv[2] || ""
+    });
 
 board.on("ready", function() {
 

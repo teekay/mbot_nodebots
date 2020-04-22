@@ -7,9 +7,9 @@ var max_speed_r = 140;
 var stdin = process.stdin;
 stdin.setRawMode(true);
 
-var board = new five.Board({port: process.argv[2]});
+var board = new five.Board({port: process.argv[2] || ""});
 
-var l_motor = r_motor = null;
+var l_motor = null, r_motor = null;
 
 board.on("ready", function(err) {
 

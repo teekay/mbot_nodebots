@@ -1,10 +1,9 @@
 // Adapted from Johnny-Five Piezo example for NodeBots session at JSConf CN
 
 var five = require("johnny-five");
-var opts = {};
-opts.port = process.argv[2] || "";
-
-var board = new five.Board(opts);
+var board = new five.Board({
+  port: process.argv[2] || ""
+});
 
 board.on("ready", function() {
   // Creates a piezo object and defines the pin to be used for the signal

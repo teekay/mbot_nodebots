@@ -15,6 +15,13 @@
 #include "lw_ws2812.h"
 #include <stdlib.h>
 
+WS2812::WS2812(uint16_t num_leds, uint16_t offset) {
+    // used if we know the length of the strip and
+    // the offset from the start of the master array
+    // up front
+    init(num_leds, offset);
+}
+
 WS2812::WS2812(uint16_t num_leds) {
     // used when we know the lengths up front.
     init(num_leds);
@@ -25,82 +32,37 @@ WS2812::WS2812() {
     init(0);
 }
 
-void WS2812::init(uint16_t num_leds) {
+void WS2812::init(uint16_t num_leds, uint16_t offset) {
 
     set_length(num_leds);
-	#ifdef RGB_ORDER_ON_RUNTIME
-		offsetGreen = 0;
-		offsetRed = 1;
-		offsetBlue = 2;
-	#endif
+    set_offset(offset);
+}
+
+void WS2812::init(uint16_t num_leds) {
+    // assume offset is zeron in this case
+    init(num_leds, 0);
+}
+
+void WS2812::set_offset(uint16_t master_offset) {
+    offset = master_offset;
 }
 
 void WS2812::set_length(uint16_t num_leds) {
-    // frees the memory appropriately based on what is sent through.
-    //
-    if (pixels) {
-        free (pixels);
-    }
-
     count_led = num_leds;
-    if (count_led > 0) {
-        if (pixels = (uint8_t *)malloc(count_led*3)) {
-            memset(pixels, 0, count_led*3);
-        } else {
-            count_led = 0;
-        }
-    }
 }
 
 uint16_t WS2812::get_length() {
     return count_led;
 }
 
-void WS2812::set_off() {
-    // turns the strip fully off.
-    memset(pixels, 0, count_led*3);
-}
-
-uint8_t WS2812::set_rgb_at(uint16_t index, uint32_t px_value) {
-    // takes a packed 24 bit value and sets the pixel appropriately.
-    if (index < count_led) {
-        uint16_t tmp_pixel;
-        tmp_pixel = index * 3;
-
-        pixels[OFFSET_R(tmp_pixel)] = (uint8_t)(px_value >> 16);
-        pixels[OFFSET_G(tmp_pixel)] = (uint8_t)(px_value >> 8);
-        pixels[OFFSET_B(tmp_pixel)] = (uint8_t)px_value;
-
-        return 0;
-    }
-    return 1;
-
-}
-
-void WS2812::sync() {
+// TODO: Remove magic threes
+void WS2812::sync(uint8_t *px_array, uint8_t pixel_depth) {
 	*ws2812_port_reg |= pinMask; // Enable DDR
-	ws2812_sendarray_mask(pixels,3*count_led,pinMask,(uint8_t*) ws2812_port,(uint8_t*) ws2812_port_reg );
+	ws2812_sendarray_mask(px_array+(offset*pixel_depth),
+            count_led * pixel_depth,
+            pinMask,(uint8_t*) ws2812_port,(uint8_t*) ws2812_port_reg
+    );
 }
-
-#ifdef RGB_ORDER_ON_RUNTIME
-void WS2812::setColorOrderGRB() { // Default color order
-	offsetGreen = 0;
-	offsetRed = 1;
-	offsetBlue = 2;
-}
-
-void WS2812::setColorOrderRGB() {
-	offsetRed = 0;
-	offsetGreen = 1;
-	offsetBlue = 2;
-}
-
-void WS2812::setColorOrderBRG() {
-	offsetBlue = 0;
-	offsetRed = 1;
-	offsetGreen = 2;
-}
-#endif
 
 WS2812::~WS2812() {
 }
@@ -119,3 +81,4 @@ void WS2812::setOutput(uint8_t pin) {
 	ws2812_port_reg = portModeRegister(digitalPinToPort(pin));
 }
 #endif
+

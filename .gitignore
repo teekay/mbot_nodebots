@@ -28,3 +28,5 @@
 *.app
 
 node_modules
+node_modules_894
+build

@@ -4,7 +4,9 @@
 
 var five = require("johnny-five");
 
-var board = new five.Board();
+var board = new five.Board({
+  port: process.argv[2] || ""
+});
 
 board.on("ready", function() {
 
@@ -13,7 +15,7 @@ board.on("ready", function() {
     // create a completely default instance
     console.log("Board ready");
 
-    var button = new five.Button({
+    var button = new five.Button({ // TODO throws `TypeError: Cannot set property 'report' of undefined`
         pin: "A7",
         controller: "TINKERKIT",
         invert: true

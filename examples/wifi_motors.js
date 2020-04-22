@@ -1,25 +1,28 @@
-// This is an example to show how to use the LEDs on the mbot.
-// mbot maps WS2812 pixels in a 2 pixel strip attached to pin 13.
+// This example from the original repo had a description copy-pasted from /examples/leds.js
+// It's unclear what this is meant to do
 
 var five = require("johnny-five");
 var firmata = require("firmata");
-var pixel = require("node-pixel");
 var HID = require("node-hid");
 
 // set up the input
 var stdin = process.openStdin();
-require('tty').setRawMode(true);
+process.stdin.setRawMode(true);
 
 var allDevices = HID.devices(0x416,0xffff);
+if (allDevices.length < 1) {
+  console.log("No HID devices available");
+  process.exit(0);
+}
 console.log(allDevices);
-var hiddev = new HID.HID(allDevices[0].path)
+var hiddev = new HID.HID(allDevices[0].path);
 
 var io = new firmata.Board(hiddev);
 
 var max_speed_l = 150;
 var max_speed_r = 140;
 
-var l_motor = r_motor = null;
+var l_motor = null, r_motor = null;
 
 var opts = {};
 opts.io = io;
